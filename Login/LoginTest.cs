@@ -14,11 +14,14 @@ namespace AddBusinessOnXero.Login
         DefaultValues defaultValues = new DefaultValues();
         ISeleniumDriver webDriver = new SeleniumWebDriver();
 
+        // Further chagnes to do:
+        // Add appropriate exceptions
+        // Tidy up of architecture
+
         [Test]
-        public void Test()
+        public void AddBusinessTest()
         {
-            int timeout = 5;
-            int applicationTimeout = 5;
+            int timeout = 15;
             string testAccountName = "testAccount" + Guid.NewGuid().ToString("n").Substring(0, 4);
 
             Random r = new Random();
@@ -27,9 +30,6 @@ namespace AddBusinessOnXero.Login
             
             //Load Browser
             driver = webDriver.GetChromeDriver(defaultValues.url);
-
-            //Locate login button
-            bool intialLoginClickable = webDriver.IsElementVisible(pageElements.loginButtonLocation, timeout);
 
             //Click Login button if element is found
             ClickAfterLoad(webDriver, pageElements.loginButtonLocation, timeout);
@@ -58,7 +58,7 @@ namespace AddBusinessOnXero.Login
             ClickAfterLoad(webDriver, pageElements.addBankAccount, timeout);
 
             //BankSelection
-            if (webDriver.IsElementVisible(pageElements.bankSearch, applicationTimeout) == true)
+            if (webDriver.IsElementVisible(pageElements.bankSearch, timeout) == true)
             {
                 webDriver.EnterText(pageElements.bankSearch, defaultValues.bankSearchText);
                 ClickAfterLoad(webDriver, pageElements.searchResult, timeout);
@@ -74,9 +74,9 @@ namespace AddBusinessOnXero.Login
                 webDriver.Click(pageElements.continueButton);
             }
 
-            ClickAfterLoad(webDriver, pageElements.gotForm, applicationTimeout);
-            ClickAfterLoad(webDriver, pageElements.laterButton, applicationTimeout);
-            ClickAfterLoad(webDriver, pageElements.goToDashboard, applicationTimeout);
+            ClickAfterLoad(webDriver, pageElements.gotForm, timeout);
+            ClickAfterLoad(webDriver, pageElements.laterButton, timeout);
+            ClickAfterLoad(webDriver, pageElements.goToDashboard, timeout);
 
             //Validate Correct Bank Details have been added
             if (webDriver.IsElementVisible(pageElements.logo, timeout) == true)
@@ -102,6 +102,11 @@ namespace AddBusinessOnXero.Login
             {
                 driver.Click(locator);
             }
+            else
+            {
+                //throw exception
+                //close driver
+            }
         }
 
         public (string answer1, string answer2) GetSecurityAnswer(IWebDriver driver)
@@ -121,6 +126,7 @@ namespace AddBusinessOnXero.Login
             else
             {
                 //Throw Exception for answer not found
+                driver.Quit();
             }
 
             return (answer1, answer2);
@@ -134,6 +140,11 @@ namespace AddBusinessOnXero.Login
                 webDriver.EnterText(firstAnswerBox, answer1);
                 webDriver.EnterText(secondAnswerBox, answer2);
                 webdriver.Click(confirm);
+            }
+            else
+            {
+                //Throw Exception
+                driver.Quit();
             }
         }
 
