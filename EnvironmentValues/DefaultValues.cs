@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace AddBusinessOnXero
 {
@@ -21,9 +22,13 @@ namespace AddBusinessOnXero
         public string GetFileName()
         {
             string currentPath = AppDomain.CurrentDomain.BaseDirectory;
-            string path = currentPath.Substring(0, currentPath.LastIndexOf("bin"));
+            string path = currentPath.Substring(0, currentPath.LastIndexOf("bin")) + @"Screenshots";
             var currentTime = DateTime.Now.ToString("yyyyMMddHHmmss");
-            var fileName = path + @"Screenshots\TestScreenshot" + currentTime + ".png";
+            var fileName = path + @"\TestScreenshot" + currentTime + ".png";
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
             return fileName;
         }
     }
