@@ -14,108 +14,90 @@ namespace AddBusinessOnXero.Login
         DefaultValues defaultValues = new DefaultValues();
         ISeleniumDriver webDriver = new SeleniumWebDriver();
 
-        // Further chagnes to do:
-        // Add appropriate exceptions
-        // Tidy up of architecture
+        [SetUp]
+        public void StartDriver()
+        {
+            //Load Browser
+            driver = webDriver.GetChromeDriver(defaultValues.url);
+        }
 
+        // This test logins to Xero Production then Add Test Business
         [Test]
         public void AddBusinessTest()
         {
-            int timeout = 15;
+            int timeout = defaultValues.timeout;
             string testAccountName = "testAccount" + Guid.NewGuid().ToString("n").Substring(0, 4);
+            var logo = By.XPath($"//a[@data-automationid = 'bankWidget']/h3[text() = '{testAccountName}']/ancestor::header/following-sibling::div/img");
 
             Random r = new Random();
             string accountNumberValue = r.Next(0, 10000000).ToString("D7");
 
-            
-            //Load Browser
-            driver = webDriver.GetChromeDriver(defaultValues.url);
-
             //Click Login button if element is found
-            ClickAfterLoad(webDriver, pageElements.loginButtonLocation, timeout);
+            webDriver.ClickAfterLoad(pageElements.loginButtonLocation, timeout);
 
             //Enter details on LoginPage
-            var secondLoginClickable = webDriver.IsElementVisible(pageElements.secondLogin, timeout);
-            if (secondLoginClickable == true)
-            {
-                webDriver.EnterText(pageElements.email, defaultValues.emailAddress);
-                webDriver.EnterText(pageElements.password, defaultValues.password);
-                webDriver.Click(pageElements.secondLogin);
-            }
+            webDriver.EnterText(pageElements.email, defaultValues.emailAddress, timeout);
+            webDriver.EnterText(pageElements.password, defaultValues.password, timeout);
+            webDriver.ClickAfterLoad(pageElements.secondLogin, timeout);
 
             //Use Backup Method
-            ClickAfterLoad(webDriver, pageElements.useBackupMethod, timeout);
+            webDriver.ClickAfterLoad(pageElements.useBackupMethod, timeout);
 
             //Use Security Questions
-            ClickAfterLoad(webDriver, pageElements.questionsSelection, timeout);
+            webDriver.ClickAfterLoad(pageElements.questionsSelection, timeout);
 
             //Answer Security Questions
-            EnterSecurityAnswers(driver, webDriver, pageElements.firstAnswer, pageElements.secondAnswer, pageElements.confirmButton, timeout);
+            EnterSecurityAnswers(webDriver, pageElements.firstAnswer, pageElements.secondAnswer, pageElements.confirmButton, timeout);
 
             //Add new Bank Account
-            ClickAfterLoad(webDriver, pageElements.accountringButton, timeout);
-            ClickAfterLoad(webDriver, pageElements.bankAccountsButton, timeout);
-            ClickAfterLoad(webDriver, pageElements.addBankAccount, timeout);
+            webDriver.ClickAfterLoad(pageElements.accountingButton, timeout);
+            webDriver.ClickAfterLoad(pageElements.bankAccountsButton, timeout);
+            webDriver.ClickAfterLoad(pageElements.addBankAccount, timeout);
 
             //BankSelection
-            if (webDriver.IsElementVisible(pageElements.bankSearch, timeout) == true)
-            {
-                webDriver.EnterText(pageElements.bankSearch, defaultValues.bankSearchText);
-                ClickAfterLoad(webDriver, pageElements.searchResult, timeout);
-            }
+            webDriver.EnterText(pageElements.bankSearch, defaultValues.bankSearchText, timeout);
+            webDriver.ClickAfterLoad(pageElements.searchResult, timeout);
 
             //Enter Bank Account Details
-            if (webDriver.IsElementVisible(pageElements.accountName, timeout) == true)
-            {
-                webDriver.EnterText(pageElements.accountName, testAccountName);
-                webDriver.Click(pageElements.accountType);
-                ClickAfterLoad(webDriver, pageElements.selectLoan, timeout);
-                webDriver.EnterText(pageElements.accountNumber, accountNumberValue);
-                webDriver.Click(pageElements.continueButton);
-            }
+            webDriver.EnterText(pageElements.accountName, testAccountName, timeout);
+            webDriver.ClickAfterLoad(pageElements.accountType, timeout);
+            webDriver.ClickAfterLoad(pageElements.selectLoan, timeout);
+            webDriver.EnterText(pageElements.accountNumber, accountNumberValue, timeout);
 
-            ClickAfterLoad(webDriver, pageElements.gotForm, timeout);
-            ClickAfterLoad(webDriver, pageElements.laterButton, timeout);
-            ClickAfterLoad(webDriver, pageElements.goToDashboard, timeout);
+            if (webDriver.FindVisibleElement(pageElements.continueButton, timeout).Displayed == true)
+                webDriver.ClickAfterLoad(pageElements.continueButton, timeout);
+
+            webDriver.ClickAfterLoad(pageElements.gotForm, timeout);
+            webDriver.ClickAfterLoad(pageElements.laterButton, timeout);
+            webDriver.ClickAfterLoad(pageElements.goToDashboard, timeout);
 
             //Validate Correct Bank Details have been added
-            if (webDriver.IsElementVisible(pageElements.logo, timeout) == true)
+            if (webDriver.IsElementVisible(logo, timeout) == true)
             {
-                var newAccountName = driver.FindElement(pageElements.newAccountName);
-                var newAccountNumber = driver.FindElement(pageElements.newAccountNumber);
-                var newLogo = driver.FindElement(pageElements.logo);
+                var newAccountNames = driver.FindElements(pageElements.newAccountName).ToList();
+                var newAccountNumbers = driver.FindElements(pageElements.newAccountNumber).ToList();
+                var newLogo = driver.FindElement(logo);
 
-                newAccountName.Text.Should().Be(testAccountName);
-                newAccountNumber.Text.Should().Be(accountNumberValue);
+                newAccountNames.Should().ContainSingle(x => x.Text == testAccountName);
+                newAccountNumbers.Should().ContainSingle(x => x.Text == accountNumberValue);
                 newLogo.Displayed.Should().BeTrue();
             }
-            else
-            {
-                driver.Quit();
-            }
-            driver.Close();
         }
 
-        public void ClickAfterLoad(ISeleniumDriver driver, By locator, int timeout)
+        [TearDown]
+        public void TearDown()
         {
-            if (driver.IsElementVisible(locator, timeout) == true)
-            {
-                driver.Click(locator);
-            }
-            else
-            {
-                //throw exception
-                //close driver
-            }
+            driver.Quit();
         }
 
-        public (string answer1, string answer2) GetSecurityAnswer(IWebDriver driver)
+        public (string answer1, string answer2) GetSecurityAnswer(ISeleniumDriver webdriver, int timeout)
         {
-            var questionSet = defaultValues.securityQuestions;
-            string question1 = driver.FindElement(pageElements.firstQuestion).Text;
-            string question2 = driver.FindElement(pageElements.secondQuestion).Text;
             string answer1 = null;
             string answer2 = null;
+
+            var questionSet = defaultValues.securityQuestions;
+            string question1 = webdriver.FindVisibleElement(pageElements.firstQuestion, timeout).Text;
+            string question2 = webdriver.FindVisibleElement(pageElements.secondQuestion, timeout).Text;
 
             if (questionSet.ContainsKey(question1) && questionSet.ContainsKey(question2))
             {
@@ -123,28 +105,17 @@ namespace AddBusinessOnXero.Login
                 answer2 = questionSet.Where(x => x.Key == question2).Select(y => y.Value).FirstOrDefault();
             }
 
-            else
-            {
-                //Throw Exception for answer not found
-                driver.Quit();
-            }
-
             return (answer1, answer2);
         }
 
-        public void EnterSecurityAnswers(IWebDriver driver, ISeleniumDriver webdriver, By firstAnswerBox, By secondAnswerBox, By confirm, int timeout)
+        public void EnterSecurityAnswers(ISeleniumDriver webdriver, By firstAnswerBox, By secondAnswerBox, By confirm, int timeout)
         {
             if (webdriver.IsElementVisible(confirm, timeout) == true)
             {
-                var (answer1, answer2) = GetSecurityAnswer(driver);
-                webDriver.EnterText(firstAnswerBox, answer1);
-                webDriver.EnterText(secondAnswerBox, answer2);
-                webdriver.Click(confirm);
-            }
-            else
-            {
-                //Throw Exception
-                driver.Quit();
+                var (answer1, answer2) = GetSecurityAnswer(webdriver, timeout);
+                webDriver.EnterText(firstAnswerBox, answer1, timeout);
+                webDriver.EnterText(secondAnswerBox, answer2, timeout);
+                webdriver.ClickAfterLoad(confirm, timeout);
             }
         }
 

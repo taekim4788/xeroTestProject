@@ -24,7 +24,7 @@ namespace AddBusinessOnXero
         public By confirmButton = By.XPath("//button[@data-automationid = 'auth-submitanswersbutton']");
 
         //Application
-        public By accountringButton = By.XPath("//button[text() = 'Accounting']");
+        public By accountingButton = By.XPath("//button[text() = 'Accounting']");
         public By bankAccountsButton = By.XPath("//a[text() = 'Bank accounts']");
         public By addBankAccount = By.XPath("//a[contains(@href, '/app/!rlBmk/bank-search')]");
         public By bankSearch = By.Id("bankSearch-input");
@@ -35,15 +35,14 @@ namespace AddBusinessOnXero
         public By accountType = By.Id("accounttype-1027-inputEl");
         public By selectLoan = By.XPath("//ul/li[text() = 'Loan']");
         public By accountNumber = By.Id("accountnumber-1056-inputEl");
-        public By continueButton = By.Id("common-button-submit-1015-btnInnerEl");
+        public By continueButton = By.XPath("//a[@data-automationid = 'continueButton']");
 
         public By gotForm = By.XPath("//a[@data-automationid = 'connectbank-buttonIHaveAForm']");
         public By laterButton = By.XPath("//a[@data-automationid = 'uploadForm-uploadLaterButton']");
         public By goToDashboard = By.XPath("//a[@data-automationid = 'uploadFormLater-goToDashboardButton']");
 
-        //public By uploadFormButton = By.XPath("//a[@data-automationid = 'uploadForm-uploadFormButton']");
+        //Returned AccountName and AccountNumber
         public By newAccountName = By.XPath("//a[@data-automationid = 'bankWidget']/h3");
         public By newAccountNumber = By.XPath("//a[@data-automationid = 'bankWidget']/div");
-        public By logo = By.XPath($"//img[@src = 'https://edge.xero.com/banking/logos/anz_smal_small.png']");
     }
 }

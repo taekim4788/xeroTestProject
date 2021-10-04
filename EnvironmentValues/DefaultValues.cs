@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+﻿using System;
 using System.Collections.Generic;
 
 namespace AddBusinessOnXero
@@ -9,6 +9,7 @@ namespace AddBusinessOnXero
         public string emailAddress = "taekim4788@gmail.com";
         public string password = "kimtae47";
         public string bankSearchText = "anz";
+        public int timeout = 5;
 
         public Dictionary<string, string> securityQuestions = new Dictionary<string, string>()
         {
@@ -16,5 +17,16 @@ namespace AddBusinessOnXero
             { "What is the phone number you remember best from your childhood?", "096340691" },
             { "Who is your favourite person from history?", "Thomas Edison" },
         };
+
+        public string GetFileName()
+        {
+            string currentPath = AppDomain.CurrentDomain.BaseDirectory;
+            string path = currentPath.Substring(0, currentPath.LastIndexOf("bin"));
+            var currentTime = DateTime.Now.ToString("yyyyMMddHHmmss");
+            var fileName = path + @"Screenshots\TestScreenshot" + currentTime + ".png";
+            return fileName;
+        }
     }
+
+    
 }
